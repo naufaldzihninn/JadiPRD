@@ -32,6 +32,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local service-account keys
+*-firebase-adminsdk-*.json
+service-account*.json
+firebase-admin*.json
+
+# local product notes / scratch docs
+/prd.md
 
 # vercel
 .vercel
@@ -39,3 +48,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# testsprite generated artifacts
+testsprite_tests/tmp/
+testsprite_tests/bin/
+testsprite_tests/*.html

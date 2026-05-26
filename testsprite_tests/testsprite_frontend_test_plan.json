@@ -1,0 +1,1088 @@
+[
+  {
+    "id": "TC001",
+    "title": "Generate a PRD after completing the interview",
+    "description": "An authenticated user can finish the interview flow, trigger generation, and reach the saved result document.",
+    "category": "Generate PRD and UI Prompt",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /interview"
+      },
+      {
+        "type": "action",
+        "description": "Complete the interview context with product answers"
+      },
+      {
+        "type": "action",
+        "description": "Trigger PRD generation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the generated result page is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the PRD document content is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Sign in and return to the requested page",
+    "description": "This verifies that a user who starts from a protected page is returned to that page after signing in.",
+    "category": "Google authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credential field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is signed in"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Start the PRD interview from the landing page",
+    "description": "A visitor can begin the PRD interview from the landing page and reach the authenticated interview flow after signing in.",
+    "category": "AI interview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the primary action to start the PRD interview"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the interview start screen is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Start PRD creation from the landing page",
+    "description": "This verifies that a visitor can begin the PRD interview from the landing page and reach the authenticated interview start after sign-in.",
+    "category": "Landing page navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the control to start PRD creation"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credential field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the interview start screen is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is signed in"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Complete an interview answer and advance to the next question",
+    "description": "An authenticated user can submit an answer in the AI interview and continue to the next question with progress updated.",
+    "category": "AI interview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /interview"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the response field with a clear product answer"
+      },
+      {
+        "type": "action",
+        "description": "Send the response"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the next interview question is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the progress checklist is updated"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Resume an unfinished interview from the dashboard",
+    "description": "This verifies that an authenticated user can open a saved draft interview and continue the unfinished interview session.",
+    "category": "Dashboard document history",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credential field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Open a saved draft interview"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the interview session is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the unfinished draft content is restored"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Open the dashboard from the landing page",
+    "description": "This verifies that a visitor can enter the dashboard from the landing page and reach the authenticated area after sign-in.",
+    "category": "Landing page navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the control to open the dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credential field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is signed in"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Resume a saved interview draft",
+    "description": "A returning user can open a saved interview session and continue from the remaining questions.",
+    "category": "AI interview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /interview"
+      },
+      {
+        "type": "action",
+        "description": "Send a partial interview answer"
+      },
+      {
+        "type": "action",
+        "description": "Open the saved session link from the interview flow"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the interview resumes with the saved conversation"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "View dashboard history and search saved documents",
+    "description": "This verifies that an authenticated user can inspect dashboard counts, search document history, and open a saved document.",
+    "category": "Dashboard document history",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credential field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Search for an existing document title"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify document history results are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard summary counts are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Open the dashboard and find a saved document",
+    "description": "An authenticated user can open the dashboard and see saved document history for browsing and reopening work.",
+    "category": "Dashboard document history",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify saved documents are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the document history summary is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Explore the product preview on the landing page",
+    "description": "This verifies that a visitor can understand the product value from the landing page and inspect the available output previews and workflow steps.",
+    "category": "Landing page navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the product overview is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the PRD preview tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a PRD preview is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the UI Prompt preview tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a UI Prompt preview is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the document versions preview tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a document versions preview is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Review the generated UI Prompt alongside the PRD",
+    "description": "A user can switch from the PRD view to the UI Prompt view on a generated result and see the alternate document content.",
+    "category": "Result preview and navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /result/[id]"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the UI Prompt view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the UI Prompt content is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the PRD content is no longer the active view"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Start a new interview from the dashboard",
+    "description": "This verifies that an authenticated user can launch a fresh PRD interview from the dashboard.",
+    "category": "Dashboard document history",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login credential field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Start a new PRD interview"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the interview start screen is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user can begin a new session"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Jump to a section from the table of contents",
+    "description": "A user can navigate within a generated result by selecting a table of contents entry and reaching the chosen section.",
+    "category": "Result preview and navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /result/[id]"
+      },
+      {
+        "type": "action",
+        "description": "Select a section from the table of contents"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected section is displayed in view"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Use a quick suggestion to respond in the interview",
+    "description": "An authenticated user can pick a quick suggestion and see it applied to the interview flow.",
+    "category": "AI interview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /interview"
+      },
+      {
+        "type": "action",
+        "description": "Select a quick suggestion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the suggestion is applied to the response or the interview advances"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC016",
+    "title": "Review the workflow steps on the landing page",
+    "description": "This verifies that a visitor can inspect the workflow preview and read the step-by-step guidance before starting an interview.",
+    "category": "Landing page navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the first workflow step"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the first workflow step details are displayed"
+      },
+      {
+        "type": "action",
+        "description": "Switch to another workflow step"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected workflow step details are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC017",
+    "title": "Revise a section and view the updated version",
+    "description": "This verifies that a signed-in user can add a note to one section, generate a targeted revision, and see a new version selected with the revised content.",
+    "category": "Section-level revision",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open a generated result document"
+      },
+      {
+        "type": "action",
+        "description": "Choose a section to revise"
+      },
+      {
+        "type": "action",
+        "description": "Type a clear revision note for the selected section"
+      },
+      {
+        "type": "action",
+        "description": "Review the selected section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a new version is selected"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the revised section content is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC018",
+    "title": "Copy the current document content",
+    "description": "A user can copy the current result content and complete the copy action successfully.",
+    "category": "Result preview and navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /result/[id]"
+      },
+      {
+        "type": "action",
+        "description": "Copy the current document content"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the copy action completes successfully"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC019",
+    "title": "Download the current document as markdown",
+    "description": "A user can download the current result content as a markdown file from the result page.",
+    "category": "Result preview and navigation",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the login password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /result/[id]"
+      },
+      {
+        "type": "action",
+        "description": "Download the current document as markdown"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the download action completes successfully"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC020",
+    "title": "Revise only the chosen section",
+    "description": "This verifies that adding a note for one section produces a revised version while other sections remain available in the document.",
+    "category": "Section-level revision",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open a generated result document"
+      },
+      {
+        "type": "action",
+        "description": "Choose a section to revise"
+      },
+      {
+        "type": "action",
+        "description": "Type a focused revision note for the selected section"
+      },
+      {
+        "type": "action",
+        "description": "Review the selected section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the revised section is updated"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify unchanged sections are still available"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC021",
+    "title": "Keep the selected version after revision",
+    "description": "This verifies that after a successful revision the document stays on the newly created version so the user can continue reviewing it.",
+    "category": "Section-level revision",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open a generated result document"
+      },
+      {
+        "type": "action",
+        "description": "Choose a section to revise"
+      },
+      {
+        "type": "action",
+        "description": "Type a clear revision note for the selected section"
+      },
+      {
+        "type": "action",
+        "description": "Review the selected section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the latest version remains selected"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the revised document is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC022",
+    "title": "Resume reviewing after a successful revision",
+    "description": "This verifies that after revising one section, the user can keep reviewing the document and navigate to other sections without losing the updated version.",
+    "category": "Section-level revision",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open a generated result document"
+      },
+      {
+        "type": "action",
+        "description": "Choose a section to revise"
+      },
+      {
+        "type": "action",
+        "description": "Type a clear revision note for the selected section"
+      },
+      {
+        "type": "action",
+        "description": "Review the selected section"
+      },
+      {
+        "type": "action",
+        "description": "Jump to another section from the table of contents"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the other section is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the revised version remains available"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC023",
+    "title": "Revise a section from the UI Prompt view",
+    "description": "This verifies that section-level revision works when the user switches to the UI Prompt tab and revises content there.",
+    "category": "Section-level revision",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open a generated result document"
+      },
+      {
+        "type": "action",
+        "description": "Switch to the UI Prompt view"
+      },
+      {
+        "type": "action",
+        "description": "Choose a section to revise"
+      },
+      {
+        "type": "action",
+        "description": "Type a clear revision note for the selected section"
+      },
+      {
+        "type": "action",
+        "description": "Review the selected section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a revised UI Prompt version is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated section content is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC024",
+    "title": "Cancel account selection and remain signed out",
+    "description": "This verifies that abandoning sign-in does not authenticate the user and keeps them on the login page.",
+    "category": "Google authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Start Google sign-in"
+      },
+      {
+        "type": "action",
+        "description": "Cancel account selection"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the login page is still displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is not signed in"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC025",
+    "title": "See validation when revision note is empty",
+    "description": "This verifies that the interface blocks revision review when the user has not provided a usable note for the selected section.",
+    "category": "Section-level revision",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open a generated result document"
+      },
+      {
+        "type": "action",
+        "description": "Choose a section to revise"
+      },
+      {
+        "type": "action",
+        "description": "Leave the revision note empty"
+      },
+      {
+        "type": "action",
+        "description": "Review the selected section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a validation message is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the revision is not created"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC026",
+    "title": "See validation when revision note is unclear",
+    "description": "This verifies that an unclear note is rejected or flagged so the user can revise with enough detail to proceed.",
+    "category": "Section-level revision",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open a generated result document"
+      },
+      {
+        "type": "action",
+        "description": "Choose a section to revise"
+      },
+      {
+        "type": "action",
+        "description": "Type an unclear revision note"
+      },
+      {
+        "type": "action",
+        "description": "Review the selected section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a revision guidance or validation message is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the section is not revised"
+      }
+    ],
+    "priority": "Low"
+  }
+]
