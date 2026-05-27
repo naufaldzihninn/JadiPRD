@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { admin, adminDb } from "@/lib/firebase/admin";
+import { admin, adminDb, getAdminAuth } from "@/lib/firebase/admin";
 
 export interface AuthenticatedUser {
   email: string | null;
@@ -16,7 +16,7 @@ export async function getAuthenticatedUser(req: NextRequest): Promise<Authentica
     throw new Error("UNAUTHENTICATED");
   }
 
-  const decodedToken = await admin.auth().verifyIdToken(token);
+  const decodedToken = await getAdminAuth().verifyIdToken(token);
 
   return {
     email: decodedToken.email || null,
