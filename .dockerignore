@@ -1,0 +1,15 @@
+.git
+.next
+node_modules
+npm-debug.log
+.env
+.env.*
+*.local
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!components.json
+testsprite_tests
+prd.md
+*.tsbuildinfo
