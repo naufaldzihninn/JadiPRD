@@ -103,6 +103,23 @@ function getSuggestionTopic(message: string): SuggestionTopic {
     return "problem";
   }
 
+  if (
+    text.includes("platform") ||
+    text.includes("diakses") ||
+    text.includes("akses") ||
+    text.includes("perangkat") ||
+    text.includes("web") ||
+    text.includes("mobile") ||
+    text.includes("android") ||
+    text.includes("ios") ||
+    text.includes("desktop") ||
+    text.includes("tablet") ||
+    text.includes("hp") ||
+    text.includes("pwa")
+  ) {
+    return "platform";
+  }
+
   if (text.includes("teknologi") || text.includes("stack") || text.includes("database") || text.includes("frontend") || text.includes("backend")) {
     return "tech";
   }
@@ -121,10 +138,6 @@ function getSuggestionTopic(message: string): SuggestionTopic {
 
   if (text.includes("waktu") || text.includes("estimasi") || text.includes("pengerjaan") || text.includes("timeline") || text.includes("berapa lama")) {
     return "timeline";
-  }
-
-  if (text.includes("platform") || text.includes("web") || text.includes("mobile") || text.includes("android") || text.includes("ios")) {
-    return "platform";
   }
 
   if (text.includes("target") || text.includes("pengguna") || text.includes("user")) {
@@ -193,25 +206,42 @@ function areSuggestionsAligned(message: string, suggestions: string[]) {
   const topic = getSuggestionTopic(message);
   const joinedSuggestions = suggestions.join(" ").toLowerCase();
   const hasGenerateSuggestion = /(buat|generate|susun).{0,20}prd/i.test(joinedSuggestions);
+  const hasPlatformSignal =
+    /(web dashboard|mobile app|hybrid|android|ios|platform|pwa|desktop|tablet|hp|perangkat|web\b|mobile\b)/i.test(
+      joinedSuggestions,
+    );
+  const hasTechSignal =
+    /(next\.?js|supabase|firebase|react|laravel|mysql|postgres|database|stack|node|backend|frontend|express|flutter)/i.test(
+      joinedSuggestions,
+    );
+  const hasDesignSignal =
+    /(visual|warna|desain|brand|saas|gelap|premium|hangat|netral|palette|palet|tema|tampilan|ui\b)/i.test(
+      joinedSuggestions,
+    );
 
   if (topic !== "generate" && hasGenerateSuggestion) {
     return false;
   }
 
   if (topic === "problem") {
-    return !/(web dashboard|mobile app|hybrid|next\.?js|supabase|firebase|laravel|mysql|warna|visual|desain)/i.test(joinedSuggestions);
+    return (
+      /(manual|stok|laporan|masalah|kendala|transaksi|pencatatan|inventori|rumuskan)/i.test(joinedSuggestions) &&
+      !hasPlatformSignal &&
+      !hasTechSignal &&
+      !hasDesignSignal
+    );
   }
 
   if (topic === "platform") {
-    return /(web|mobile|hybrid|android|ios|platform|ai pilih)/i.test(joinedSuggestions);
+    return hasPlatformSignal && !hasDesignSignal && !hasTechSignal;
   }
 
   if (topic === "tech") {
-    return /(ai pilih|next\.?js|supabase|firebase|react|laravel|mysql|database|stack|node)/i.test(joinedSuggestions);
+    return hasTechSignal && !hasDesignSignal && !hasPlatformSignal;
   }
 
   if (topic === "design") {
-    return /(ai pilih|visual|warna|desain|brand|saas|gelap|premium|hangat|netral)/i.test(joinedSuggestions);
+    return hasDesignSignal && !hasPlatformSignal && !hasTechSignal;
   }
 
   if (topic === "timeline") {
@@ -223,14 +253,19 @@ function areSuggestionsAligned(message: string, suggestions: string[]) {
   }
 
   if (topic === "feature") {
-    return /(fitur|prioritas|data|laporan|notifikasi|manajemen|ai bantu)/i.test(joinedSuggestions);
+    return (
+      /(fitur|prioritas|data|laporan|notifikasi|manajemen|ai bantu)/i.test(joinedSuggestions) &&
+      !hasPlatformSignal &&
+      !hasTechSignal &&
+      !hasDesignSignal
+    );
   }
 
   if (topic === "generate") {
     return /(buat prd|dokumen kebutuhan produk|generate prd|revisi|tambahkan|detail|setuju)/i.test(joinedSuggestions);
   }
 
-  return true;
+  return false;
 }
 
 function parseSuggestions(replyText: string) {
