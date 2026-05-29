@@ -16,7 +16,7 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { db } from "@/lib/firebase/config";
+import { getClientDb } from "@/lib/firebase/config";
 import {
   ArrowLeft,
   Bot,
@@ -318,6 +318,7 @@ export default function InterviewPage() {
       setIsLoadingSession(true);
 
       try {
+        const db = getClientDb();
         const sessionRef = doc(db, "interview_sessions", sessionToLoad);
         const sessionSnap = await getDoc(sessionRef);
 
@@ -392,6 +393,7 @@ export default function InterviewPage() {
     };
 
     const activeSessionId = sessionIdRef.current || sessionId;
+    const db = getClientDb();
 
     if (activeSessionId) {
       await setDoc(doc(db, "interview_sessions", activeSessionId), payload, { merge: true });

@@ -16,7 +16,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { auth } from "@/lib/firebase/config";
+import { getClientAuth } from "@/lib/firebase/config";
 
 interface AuthContextValue {
   getIdToken: () => Promise<string>;
@@ -36,6 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const auth = getClientAuth();
+
     return onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsLoading(false);
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
+    const auth = getClientAuth();
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
     await signInWithPopup(auth, provider);
@@ -60,14 +63,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(data.error || "Login test tidak tersedia.");
     }
 
-    await signInWithCustomToken(auth, data.token);
+    await signInWithCustomToken(getClientAuth(), data.token);
   }, []);
 
   const signOutUser = useCallback(async () => {
-    await signOut(auth);
+    await signOut(getClientAuth());
   }, []);
 
   const getIdToken = useCallback(async () => {
+    const auth = getClientAuth();
     const currentUser = auth.currentUser;
 
     if (!currentUser) {

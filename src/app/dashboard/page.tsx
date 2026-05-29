@@ -8,7 +8,7 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/brand/BrandMark";
-import { db } from "@/lib/firebase/config";
+import { getClientDb } from "@/lib/firebase/config";
 import {
   ArrowRight,
   Bot,
@@ -130,6 +130,7 @@ function DashboardContent() {
       setDocsError("");
 
       try {
+        const db = getClientDb();
         const docsQuery = query(
           collection(db, "outputs"),
           where("user_id", "==", userId)

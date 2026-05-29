@@ -10,7 +10,7 @@ import {
   LogIn,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/firebase/config";
+import { getClientDb } from "@/lib/firebase/config";
 import { useAuth } from "./AuthProvider";
 import { UserMenu } from "./UserMenu";
 
@@ -60,6 +60,7 @@ function useLatestOutputHref() {
       setIsCheckingOutput(true);
 
       try {
+        const db = getClientDb();
         const outputsQuery = query(
           collection(db, "outputs"),
           where("user_id", "==", userId)

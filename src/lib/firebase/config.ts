@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -38,20 +38,4 @@ function getClientDb() {
   return getFirestore(getClientApp());
 }
 
-const auth = new Proxy({} as Auth, {
-  get(_target, prop, receiver) {
-    const clientAuth = getClientAuth();
-    const value = Reflect.get(clientAuth, prop, receiver);
-    return typeof value === "function" ? value.bind(clientAuth) : value;
-  },
-});
-
-const db = new Proxy({} as Firestore, {
-  get(_target, prop, receiver) {
-    const clientDb = getClientDb();
-    const value = Reflect.get(clientDb, prop, receiver);
-    return typeof value === "function" ? value.bind(clientDb) : value;
-  },
-});
-
-export { auth, db, getClientApp, getClientAuth, getClientDb };
+export { getClientApp, getClientAuth, getClientDb };
