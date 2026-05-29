@@ -80,7 +80,10 @@ function getSuggestionTopic(message: string): SuggestionTopic {
     [...paragraphs].reverse().find((paragraph) => paragraph.includes("?")) ||
     paragraphs.at(-1) ||
     message;
-  const text = (lastQuestion || questionParagraph).toLowerCase();
+  const text = [questionParagraph, lastQuestion]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 
   if (
     /(?:siap|setuju|oke|ok).{0,80}(?:buat|membuat|generate|susun).{0,20}prd/i.test(text) ||
@@ -96,6 +99,15 @@ function getSuggestionTopic(message: string): SuggestionTopic {
     text.includes("problem") ||
     text.includes("kendala") ||
     text.includes("tantangan") ||
+    text.includes("pain point") ||
+    text.includes("keluhan") ||
+    text.includes("kesalahan") ||
+    text.includes("tidak akurat") ||
+    text.includes("kurang efisien") ||
+    text.includes("mengurangi") ||
+    text.includes("memperbaiki") ||
+    text.includes("masalah utama") ||
+    text.includes("ingin menyelesaikan") ||
     text.includes("ingin kamu selesaikan") ||
     text.includes("ingin diselesaikan") ||
     text.includes("paling ingin kamu selesaikan")
@@ -140,7 +152,16 @@ function getSuggestionTopic(message: string): SuggestionTopic {
     return "timeline";
   }
 
-  if (text.includes("target") || text.includes("pengguna") || text.includes("user")) {
+  if (
+    text.includes("target") ||
+    text.includes("pengguna") ||
+    text.includes("user") ||
+    text.includes("siapa yang") ||
+    text.includes("siapa saja") ||
+    text.includes("role") ||
+    text.includes("peran") ||
+    text.includes("pemakai")
+  ) {
     return "target";
   }
 
@@ -191,7 +212,7 @@ function getFallbackSuggestions(message: string, turnCount: number) {
     return ["✅ Ya, buat PRD sekarang", "✏️ Revisi ringkasan dulu", "➕ Tambahkan detail lagi"];
   }
 
-  if (turnCount <= 2) {
+  if (!message.trim() || turnCount <= 1) {
     return defaultSuggestions;
   }
 
