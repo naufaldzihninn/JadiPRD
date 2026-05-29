@@ -68,22 +68,69 @@ type SuggestionTopic =
   | "timeline"
   | "unknown";
 
+function getLatestPromptText(message: string) {
+  const normalized = message
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const questionEnd = normalized.lastIndexOf("?");
+
+  if (questionEnd === -1) {
+    return normalized.split(/\n{2,}/).filter(Boolean).at(-1) || normalized;
+  }
+
+  const beforeQuestion = normalized.slice(0, questionEnd + 1);
+  const lowerBeforeQuestion = beforeQuestion.toLowerCase();
+  const promptMarkers = [
+    "sekarang,",
+    "pertanyaan selanjutnya",
+    "berikut pertanyaan selanjutnya",
+    "berikutnya,",
+    "selanjutnya,",
+    "terakhir,",
+    "untuk lanjut,",
+    "supaya lanjut,",
+    "apakah",
+    "apa ",
+    "siapa ",
+    "berapa ",
+    "ada ",
+  ];
+  const markerIndex = promptMarkers.reduce((latestIndex, marker) => {
+    const index = lowerBeforeQuestion.lastIndexOf(marker);
+    return index > latestIndex ? index : latestIndex;
+  }, -1);
+
+  if (markerIndex >= 0) {
+    return beforeQuestion.slice(markerIndex).trim();
+  }
+
+  const paragraphStart = beforeQuestion.lastIndexOf("\n\n");
+
+  if (paragraphStart >= 0) {
+    return beforeQuestion.slice(paragraphStart).trim();
+  }
+
+  const sentenceStart = Math.max(
+    beforeQuestion.lastIndexOf(". "),
+    beforeQuestion.lastIndexOf("! "),
+    beforeQuestion.lastIndexOf("? "),
+  );
+
+  if (sentenceStart >= 0) {
+    return beforeQuestion.slice(sentenceStart + 2).trim();
+  }
+
+  return beforeQuestion.slice(Math.max(0, beforeQuestion.length - 320)).trim();
+}
+
 function getSuggestionTopic(message: string): SuggestionTopic {
-  const normalizedMessage = message.replace(/\s+/g, " ").trim();
-  const questionSentences = normalizedMessage.match(/[^?]*\?/g);
-  const lastQuestion = questionSentences?.at(-1)?.trim();
-  const paragraphs = message
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-  const questionParagraph =
-    [...paragraphs].reverse().find((paragraph) => paragraph.includes("?")) ||
-    paragraphs.at(-1) ||
-    message;
-  const text = [questionParagraph, lastQuestion]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+  const text = getLatestPromptText(message).toLowerCase();
 
   if (
     /(?:siap|setuju|oke|ok).{0,80}(?:buat|membuat|generate|susun).{0,20}prd/i.test(text) ||
@@ -116,6 +163,23 @@ function getSuggestionTopic(message: string): SuggestionTopic {
   }
 
   if (
+    text.includes("arah visual") ||
+    text.includes("preferensi visual") ||
+    text.includes("warna") ||
+    text.includes("color") ||
+    text.includes("desain") ||
+    text.includes("visual") ||
+    text.includes("brand") ||
+    text.includes("tampilan") ||
+    text.includes("nuansa") ||
+    text.includes("tema") ||
+    text.includes("gaya") ||
+    text.includes("ui")
+  ) {
+    return "design";
+  }
+
+  if (
     text.includes("platform") ||
     text.includes("diakses") ||
     text.includes("akses") ||
@@ -132,20 +196,22 @@ function getSuggestionTopic(message: string): SuggestionTopic {
     return "platform";
   }
 
-  if (text.includes("teknologi") || text.includes("stack") || text.includes("database") || text.includes("frontend") || text.includes("backend")) {
-    return "tech";
-  }
-
   if (
-    text.includes("warna") ||
-    text.includes("desain") ||
-    text.includes("visual") ||
-    text.includes("brand") ||
-    text.includes("tampilan") ||
-    text.includes("nuansa") ||
-    text.includes("ui")
+    text.includes("teknologi") ||
+    text.includes("stack") ||
+    text.includes("database") ||
+    text.includes("frontend") ||
+    text.includes("front-end") ||
+    text.includes("backend") ||
+    text.includes("back-end") ||
+    text.includes("react") ||
+    text.includes("next.js") ||
+    text.includes("supabase") ||
+    text.includes("firebase") ||
+    text.includes("laravel") ||
+    text.includes("mysql")
   ) {
-    return "design";
+    return "tech";
   }
 
   if (text.includes("waktu") || text.includes("estimasi") || text.includes("pengerjaan") || text.includes("timeline") || text.includes("berapa lama")) {
@@ -217,76 +283,6 @@ function getFallbackSuggestions(message: string, turnCount: number) {
   }
 
   return ["✅ Setuju", "✏️ Aku mau jawab sendiri", "➕ Ada tambahan konteks"];
-}
-
-function areSuggestionsAligned(message: string, suggestions: string[]) {
-  if (suggestions.length === 0) {
-    return false;
-  }
-
-  const topic = getSuggestionTopic(message);
-  const joinedSuggestions = suggestions.join(" ").toLowerCase();
-  const hasGenerateSuggestion = /(buat|generate|susun).{0,20}prd/i.test(joinedSuggestions);
-  const hasPlatformSignal =
-    /(web dashboard|mobile app|hybrid|android|ios|platform|pwa|desktop|tablet|hp|perangkat|web\b|mobile\b)/i.test(
-      joinedSuggestions,
-    );
-  const hasTechSignal =
-    /(next\.?js|supabase|firebase|react|laravel|mysql|postgres|database|stack|node|backend|frontend|express|flutter)/i.test(
-      joinedSuggestions,
-    );
-  const hasDesignSignal =
-    /(visual|warna|desain|brand|saas|gelap|premium|hangat|netral|palette|palet|tema|tampilan|ui\b)/i.test(
-      joinedSuggestions,
-    );
-
-  if (topic !== "generate" && hasGenerateSuggestion) {
-    return false;
-  }
-
-  if (topic === "problem") {
-    return (
-      /(manual|stok|laporan|masalah|kendala|transaksi|pencatatan|inventori|rumuskan)/i.test(joinedSuggestions) &&
-      !hasPlatformSignal &&
-      !hasTechSignal &&
-      !hasDesignSignal
-    );
-  }
-
-  if (topic === "platform") {
-    return hasPlatformSignal && !hasDesignSignal && !hasTechSignal;
-  }
-
-  if (topic === "tech") {
-    return hasTechSignal && !hasDesignSignal && !hasPlatformSignal;
-  }
-
-  if (topic === "design") {
-    return hasDesignSignal && !hasPlatformSignal && !hasTechSignal;
-  }
-
-  if (topic === "timeline") {
-    return /(hari|minggu|bulan|mvp|cepat|jangka)/i.test(joinedSuggestions);
-  }
-
-  if (topic === "target") {
-    return /(pemilik|staf|admin|user|pengguna|kasir|owner|operator|customer|pelanggan)/i.test(joinedSuggestions);
-  }
-
-  if (topic === "feature") {
-    return (
-      /(fitur|prioritas|data|laporan|notifikasi|manajemen|ai bantu)/i.test(joinedSuggestions) &&
-      !hasPlatformSignal &&
-      !hasTechSignal &&
-      !hasDesignSignal
-    );
-  }
-
-  if (topic === "generate") {
-    return /(buat prd|dokumen kebutuhan produk|generate prd|revisi|tambahkan|detail|setuju)/i.test(joinedSuggestions);
-  }
-
-  return false;
 }
 
 function parseSuggestions(replyText: string) {
@@ -511,10 +507,8 @@ export default function InterviewPage() {
       if (!response.ok) throw new Error("Gagal mengambil respon dari AI");
 
       const data = await response.json();
-      const { cleanedReply, suggestions: parsedSuggestions } = parseSuggestions(data.reply);
-      const newSuggestions = areSuggestionsAligned(cleanedReply, parsedSuggestions)
-        ? parsedSuggestions
-        : getFallbackSuggestions(cleanedReply, messages.length + 1);
+      const { cleanedReply } = parseSuggestions(data.reply);
+      const newSuggestions = getFallbackSuggestions(cleanedReply, messagesWithUser.length + 1);
 
       setSuggestions(newSuggestions);
 
