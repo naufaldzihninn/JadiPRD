@@ -61,15 +61,72 @@ type SuggestionTopic =
   | "design"
   | "feature"
   | "generate"
+  | "idea"
   | "platform"
   | "problem"
+  | "success"
   | "target"
   | "tech"
   | "timeline"
   | "unknown";
 
+const suggestionsByTopic: Record<SuggestionTopic, string[]> = {
+  idea: defaultSuggestions,
+  problem: [
+    "🧾 Pencatatan masih manual",
+    "📦 Stok sering tidak akurat",
+    "⏱️ Laporan makan waktu",
+    "🤖 AI bantu rumuskan masalah",
+  ],
+  target: [
+    "👤 Pemilik bisnis",
+    "👥 Kasir / staf operasional",
+    "🛒 Pelanggan juga",
+    "🤖 AI bantu susun role",
+  ],
+  feature: [
+    "🤖 AI bantu prioritaskan",
+    "📦 Manajemen data",
+    "📊 Laporan otomatis",
+    "🔔 Notifikasi penting",
+  ],
+  platform: [
+    "🤖 AI pilih yang paling cocok",
+    "🌐 Web dashboard",
+    "📱 Mobile app",
+    "🔁 Hybrid web + mobile",
+  ],
+  tech: [
+    "🤖 AI pilih rekomendasi terbaik",
+    "⚡ Next.js + Supabase",
+    "🔥 Firebase + React",
+    "🧱 Laravel + MySQL",
+  ],
+  design: [
+    "🤖 AI pilih arah visual terbaik",
+    "🏢 SaaS netral profesional",
+    "🌿 Hangat dan mudah didekati",
+    "⚫ Gelap, fokus, dan premium",
+  ],
+  timeline: ["🏃 Cepat 3-5 hari", "📦 MVP 1-2 minggu", "🚀 Versi lengkap 1 bulan+"],
+  success: [
+    "✅ Transaksi lebih cepat",
+    "📉 Selisih stok berkurang",
+    "📊 Laporan siap tiap hari",
+    "🤖 AI bantu tentukan metrik",
+  ],
+  generate: ["✅ Ya, buat PRD sekarang", "✏️ Revisi ringkasan dulu", "➕ Tambahkan detail lagi"],
+  unknown: ["✍️ Jawab bebas", "🤖 AI bantu pilihkan", "➕ Tambahkan konteks"],
+};
+
+function stripSuggestionHints(text: string) {
+  return text
+    .replace(/(?:^|\n)\s*(?:SUGGESTIONS|SARAN|PILIHAN|OPSI)\s*:\s*([^\n]+)/gi, "")
+    .trim();
+}
+
 function getLatestPromptText(message: string) {
-  const normalized = message
+  const normalized = stripSuggestionHints(message)
     .replace(/\r\n/g, "\n")
     .replace(/[ \t]+/g, " ")
     .trim();
@@ -161,6 +218,20 @@ function classifyActiveQuestion(text: string): SuggestionTopic {
   }
 
   if (
+    promptIncludes(cleanText, [
+      "mau bikin aplikasi",
+      "mau buat aplikasi",
+      "aplikasi seperti apa",
+      "ceritain idemu",
+      "ide produk",
+      "produk apa",
+      "mau dibuat",
+    ])
+  ) {
+    return "idea";
+  }
+
+  if (
     /(?:siap|setuju|oke|ok).{0,80}(?:buat|membuat|generate|susun).{0,20}prd/i.test(cleanText) ||
     /(?:buat|membuat|generate|susun).{0,20}prd.{0,80}(?:sekarang|pertama|final|siap)/i.test(cleanText) ||
     /(?:apakah|apa).{0,80}(?:siap|mau).{0,80}(?:prd|dokumen)/i.test(cleanText)
@@ -169,29 +240,40 @@ function classifyActiveQuestion(text: string): SuggestionTopic {
   }
 
   if (
-    /(?:siapa|siapa saja|untuk siapa|untuk anda|untuk kamu|untuk para|hanya untuk|juga untuk|target pengguna|pengguna.*siapa|role|peran|pemakai|pakai|memakai|menggunakan|dipakai|akses oleh|login|akun)/i.test(cleanText) &&
     promptIncludes(cleanText, [
-      "target",
-      "pengguna",
-      "user",
-      "role",
-      "peran",
-      "pemakai",
+      "masalah utama",
+      "problem utama",
+      "kendala utama",
+      "tantangan utama",
+      "pain point",
+      "ingin diselesaikan",
+      "ingin kamu selesaikan",
+      "paling ingin kamu selesaikan",
+      "apa yang ingin",
+      "apa yang paling",
+      "mengurangi kesalahan",
+      "memperbaiki",
+    ])
+  ) {
+    return "problem";
+  }
+
+  if (
+    promptIncludes(cleanText, [
+      "siapa target",
+      "target pengguna",
+      "siapa pengguna",
+      "siapa saja pengguna",
+      "untuk siapa",
+      "siapa yang akan",
+      "siapa yang memakai",
+      "pengguna dari",
+      "role pengguna",
+      "peran pengguna",
       "anda sendiri",
       "kamu sendiri",
-      "pemilik",
-      "owner",
-      "karyawan",
-      "staf",
-      "staff",
-      "kasir",
-      "admin",
-      "operator",
-      "barista",
-      "pelanggan",
-      "customer",
-      "akun",
-      "login",
+      "karyawan lainnya",
+      "para pelanggan",
     ])
   ) {
     return "target";
@@ -199,13 +281,19 @@ function classifyActiveQuestion(text: string): SuggestionTopic {
 
   if (
     promptIncludes(cleanText, [
+      "fitur",
       "fitur apa",
       "fitur utama",
       "fitur paling",
       "prioritas fitur",
       "fitur mvp",
       "cakupan mvp",
+      "cakupan",
+      "scope",
+      "mvp",
       "mvp scope",
+      "kebutuhan utama",
+      "requirement",
       "yang paling penting",
       "yang perlu diprioritaskan",
     ])
@@ -215,6 +303,7 @@ function classifyActiveQuestion(text: string): SuggestionTopic {
 
   if (
     promptIncludes(cleanText, [
+      "platform",
       "platform mana",
       "platform apa",
       "diakses melalui",
@@ -284,6 +373,7 @@ function classifyActiveQuestion(text: string): SuggestionTopic {
       "waktu pengerjaan",
       "timeline",
       "deadline",
+      "target rilis",
     ])
   ) {
     return "timeline";
@@ -291,170 +381,22 @@ function classifyActiveQuestion(text: string): SuggestionTopic {
 
   if (
     promptIncludes(cleanText, [
-      "masalah utama",
-      "problem utama",
-      "kendala utama",
-      "tantangan utama",
-      "pain point",
-      "ingin diselesaikan",
-      "ingin kamu selesaikan",
-      "paling ingin kamu selesaikan",
-      "apa yang ingin",
-      "apa yang paling",
-      "mengurangi kesalahan",
-      "memperbaiki",
+      "kriteria sukses",
+      "metrik",
+      "indikator",
+      "ukuran berhasil",
+      "dianggap berhasil",
+      "acceptance",
+      "diterima",
     ])
   ) {
-    return "problem";
-  }
-
-  return "unknown";
-}
-
-function classifySuggestionTopic(text: string): SuggestionTopic {
-  if (
-    /(?:siap|setuju|oke|ok).{0,80}(?:buat|membuat|generate|susun).{0,20}prd/i.test(text) ||
-    /(?:buat|membuat|generate|susun).{0,20}prd.{0,80}(?:sekarang|pertama|final|siap)/i.test(text) ||
-    /siap.{0,80}(?:dokumen kebutuhan produk|dokumen produk)/i.test(text) ||
-    /(?:dokumen kebutuhan produk|dokumen produk).{0,80}(?:lengkap|final|sekarang|siap)/i.test(text)
-  ) {
-    return "generate";
-  }
-
-  if (
-    promptIncludes(text, [
-      "masalah",
-      "problem",
-      "kendala",
-      "tantangan",
-      "pain point",
-      "keluhan",
-      "kesalahan",
-      "tidak akurat",
-      "kurang efisien",
-      "mengurangi",
-      "memperbaiki",
-      "masalah utama",
-      "ingin menyelesaikan",
-      "ingin kamu selesaikan",
-      "ingin diselesaikan",
-      "paling ingin kamu selesaikan",
-    ])
-  ) {
-    return "problem";
-  }
-
-  if (
-    promptIncludes(text, [
-      "target",
-      "pengguna",
-      "user",
-      "siapa yang",
-      "siapa saja",
-      "role",
-      "peran",
-      "pemakai",
-      "anda sendiri",
-      "kamu sendiri",
-      "pemilik",
-      "owner",
-      "karyawan",
-      "staf",
-      "staff",
-      "kasir",
-      "admin",
-      "operator",
-      "barista",
-      "pelanggan",
-      "customer",
-    ])
-  ) {
-    return "target";
-  }
-
-  if (
-    promptIncludes(text, [
-      "fitur",
-      "fitur utama",
-      "utama",
-      "prioritas",
-      "mvp scope",
-      "cakupan mvp",
-      "kebutuhan fitur",
-      "paling penting",
-      "yang penting",
-    ])
-  ) {
-    return "feature";
-  }
-
-  if (
-    promptIncludes(text, [
-      "arah visual",
-      "preferensi visual",
-      "warna",
-      "color",
-      "desain",
-      "visual",
-      "brand",
-      "tampilan",
-      "nuansa",
-      "tema",
-      "gaya",
-      "ui",
-    ])
-  ) {
-    return "design";
-  }
-
-  if (
-    promptIncludes(text, [
-      "platform",
-      "diakses",
-      "akses",
-      "perangkat",
-      "web",
-      "mobile",
-      "android",
-      "ios",
-      "desktop",
-      "tablet",
-      "hp",
-      "pwa",
-    ])
-  ) {
-    return "platform";
-  }
-
-  if (
-    promptIncludes(text, [
-      "teknologi",
-      "stack",
-      "database",
-      "frontend",
-      "front-end",
-      "backend",
-      "back-end",
-      "react",
-      "next.js",
-      "supabase",
-      "firebase",
-      "laravel",
-      "mysql",
-    ])
-  ) {
-    return "tech";
-  }
-
-  if (promptIncludes(text, ["waktu", "estimasi", "pengerjaan", "timeline", "berapa lama"])) {
-    return "timeline";
+    return "success";
   }
 
   return "unknown";
 }
 
 function getSuggestionTopic(message: string): SuggestionTopic {
-  const promptText = getLatestPromptText(message).toLowerCase();
   const activeQuestionText = getActiveQuestionText(message);
   const activeQuestionTopic = classifyActiveQuestion(activeQuestionText);
 
@@ -462,79 +404,27 @@ function getSuggestionTopic(message: string): SuggestionTopic {
     return activeQuestionTopic;
   }
 
-  const promptQuestionTopic = classifyActiveQuestion(promptText);
+  const promptQuestionTopic = classifyActiveQuestion(getLatestPromptText(message));
 
   if (promptQuestionTopic !== "unknown") {
     return promptQuestionTopic;
   }
 
-  return classifySuggestionTopic(promptText);
+  return "unknown";
 }
 
-function getFallbackSuggestions(message: string, turnCount: number) {
+function getFallbackSuggestions(message: string, _turnCount: number) {
   const topic = getSuggestionTopic(message);
 
-  if (topic === "problem") {
-    return ["🧾 Pencatatan masih manual", "📦 Stok sering tidak akurat", "⏱️ Laporan makan waktu", "🤖 AI bantu rumuskan masalah"];
+  if (!message.trim()) {
+    return suggestionsByTopic.idea;
   }
 
-  if (topic === "tech") {
-    return ["🤖 AI pilih rekomendasi terbaik", "⚡ Next.js + Supabase", "🔥 Firebase + React", "🧱 Laravel + MySQL"];
-  }
-
-  if (topic === "design") {
-    return [
-      "🤖 AI pilih arah visual terbaik",
-      "🏢 SaaS netral profesional",
-      "🌿 Hangat dan mudah didekati",
-      "⚫ Gelap, fokus, dan premium",
-    ];
-  }
-
-  if (topic === "timeline") {
-    return ["🏃 Cepat 3-5 hari", "📦 MVP 1-2 minggu", "🚀 Versi lengkap 1 bulan+"];
-  }
-
-  if (topic === "platform") {
-    return ["🤖 AI pilih yang paling cocok", "🌐 Web dashboard", "📱 Mobile app", "🔁 Hybrid web + mobile"];
-  }
-
-  if (topic === "target") {
-    return ["👤 Pemilik bisnis", "👥 Kasir / staf operasional", "🛒 Pelanggan juga", "🤖 AI bantu susun role"];
-  }
-
-  if (topic === "feature") {
-    return ["🤖 AI bantu prioritaskan", "📦 Manajemen data", "📊 Laporan otomatis", "🔔 Notifikasi penting"];
-  }
-
-  if (topic === "generate") {
-    return ["✅ Ya, buat PRD sekarang", "✏️ Revisi ringkasan dulu", "➕ Tambahkan detail lagi"];
-  }
-
-  if (!message.trim() || turnCount <= 1) {
-    return defaultSuggestions;
-  }
-
-  return ["✍️ Jawab bebas", "🤖 AI bantu pilihkan", "➕ Tambahkan konteks"];
+  return suggestionsByTopic[topic] || suggestionsByTopic.unknown;
 }
 
 function parseSuggestions(replyText: string) {
-  const suggestionMatches = [...replyText.matchAll(/(?:SUGGESTIONS|SARAN|PILIHAN|OPSI)\s*:\s*([^\n]+)/gi)];
-  const suggestionMatch = suggestionMatches.at(-1);
-
-  if (!suggestionMatch) {
-    return { cleanedReply: replyText.trim(), suggestions: [] };
-  }
-
-  const suggestions = suggestionMatch[1]
-    .split("|")
-    .map((s: string) => s.trim().replace(/^\[|\]$/g, "").trim())
-    .filter((s: string) => s);
-
-  return {
-    cleanedReply: replyText.replace(/(?:SUGGESTIONS|SARAN|PILIHAN|OPSI)\s*:\s*([^\n]+)/gi, "").trim(),
-    suggestions,
-  };
+  return { cleanedReply: stripSuggestionHints(replyText), suggestions: [] };
 }
 
 function isGenerateSuggestion(suggestion: string) {

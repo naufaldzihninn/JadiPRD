@@ -82,6 +82,10 @@ function getDefaultProvider(task: AiTaskType): AiProvider {
   return normalizeProvider(process.env.GENERATE_AI_PROVIDER || process.env.AI_PROVIDER, "gemini");
 }
 
+function shouldUseGlobalFallback(task: AiTaskType) {
+  return task === "chat" || task === "revise_section";
+}
+
 export function getAiProviderOrder(task: AiTaskType): AiProvider[] {
   const prefix = getTaskEnvPrefix(task);
   const primary = normalizeProvider(
@@ -90,12 +94,14 @@ export function getAiProviderOrder(task: AiTaskType): AiProvider[] {
       process.env.AI_PROVIDER,
     getDefaultProvider(task)
   );
-  const taskFallback = normalizeFallbackProvider(
-    process.env[`AI_${prefix}_FALLBACK_PROVIDER`] ||
-      process.env[`${prefix}_AI_FALLBACK_PROVIDER`]
-  );
-  const globalFallback = normalizeFallbackProvider(process.env.AI_FALLBACK_PROVIDER);
-  const fallback = taskFallback || globalFallback;
+  const taskFallbackRaw =
+    process.env[`AI_${prefix}_FALLBACK_PROVIDER`] ??
+    process.env[`${prefix}_AI_FALLBACK_PROVIDER`];
+  const taskFallback = normalizeFallbackProvider(taskFallbackRaw);
+  const globalFallback = shouldUseGlobalFallback(task)
+    ? normalizeFallbackProvider(process.env.AI_FALLBACK_PROVIDER)
+    : null;
+  const fallback = taskFallbackRaw !== undefined ? taskFallback : globalFallback;
 
   if (!fallback || fallback === "none" || fallback === primary) {
     return [primary];

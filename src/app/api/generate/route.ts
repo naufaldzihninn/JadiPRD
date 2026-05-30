@@ -118,6 +118,40 @@ function extractCleanJson(rawResponse: string): string {
   return clean;
 }
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function isTokenSizeError(error: unknown) {
+  return /(413|request too large|tokens per minute|\btpm\b|reduce your message size|context length|too many tokens|max(?:imum)? tokens|input tokens)/i.test(
+    getErrorMessage(error)
+  );
+}
+
+function truncateForPrompt(value: string, maxLength: number) {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, Math.max(0, maxLength - 80)).trim()}\n...[dipersingkat agar tidak melewati limit token]`;
+}
+
+function buildCompactConversation(messages: ChatMessage[]) {
+  const meaningful = messages.filter((message) => message.content.trim());
+  const selected =
+    meaningful.length > 16 ? [...meaningful.slice(0, 2), ...meaningful.slice(-14)] : meaningful;
+
+  return truncateForPrompt(
+    selected
+      .map((message) => {
+        const content = truncateForPrompt(message.content.replace(/\s+/g, " ").trim(), 700);
+        return `${message.role.toUpperCase()}: ${content}`;
+      })
+      .join("\n"),
+    9000
+  );
+}
+
 async function runJsonPrompt(prompt: string): Promise<{ model: string; text: string; provider: Provider }> {
   let lastError: unknown = null;
 
@@ -177,6 +211,10 @@ async function runJsonPrompt(prompt: string): Promise<{ model: string; text: str
       return { model: modelName, text: extractCleanJson(rawResponse), provider };
     } catch (error: unknown) {
       lastError = error;
+      if (isTokenSizeError(error)) {
+        console.warn(`Provider JSON ${provider} gagal karena payload terlalu besar; fallback dihentikan.`, error);
+        break;
+      }
       console.warn(`Provider JSON ${provider} gagal, mencoba fallback...`, error);
     }
   }
@@ -242,6 +280,10 @@ async function runTextPrompt(
       return { model: modelName, text: rawResponse.trim(), provider };
     } catch (error: unknown) {
       lastError = error;
+      if (isTokenSizeError(error)) {
+        console.warn(`Provider text ${provider} gagal karena payload terlalu besar; fallback dihentikan.`, error);
+        break;
+      }
       console.warn(`Provider text ${provider} gagal, mencoba fallback...`, error);
     }
   }
@@ -309,9 +351,7 @@ ${content}
 }
 
 function buildExtractionPrompt(messages: ChatMessage[]): string {
-  const conversation = messages
-    .map((message) => `${message.role.toUpperCase()}: ${message.content}`)
-    .join("\n");
+  const conversation = buildCompactConversation(messages);
 
   return `
 Kamu adalah senior product manager yang sedang menyiapkan bahan PRD final untuk tim engineering.
