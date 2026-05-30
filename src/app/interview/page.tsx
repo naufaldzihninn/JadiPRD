@@ -86,52 +86,232 @@ function getLatestPromptText(message: string) {
 
   const beforeQuestion = normalized.slice(0, questionEnd + 1);
   const lowerBeforeQuestion = beforeQuestion.toLowerCase();
-  const promptMarkers = [
+  const paragraphs = beforeQuestion
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  const questionParagraph =
+    [...paragraphs].reverse().find((paragraph) => paragraph.includes("?")) ||
+    paragraphs.at(-1) ||
+    beforeQuestion;
+  const questionParagraphStart = beforeQuestion.lastIndexOf(questionParagraph);
+  const flowMarkers = [
     "sekarang,",
     "pertanyaan selanjutnya",
     "berikut pertanyaan selanjutnya",
+    "mari kita tanya",
     "berikutnya,",
     "selanjutnya,",
     "terakhir,",
     "untuk lanjut,",
     "supaya lanjut,",
-    "apakah",
-    "apa ",
-    "siapa ",
-    "berapa ",
-    "ada ",
   ];
-  const markerIndex = promptMarkers.reduce((latestIndex, marker) => {
+  const markerIndex = flowMarkers.reduce((latestIndex, marker) => {
     const index = lowerBeforeQuestion.lastIndexOf(marker);
     return index > latestIndex ? index : latestIndex;
   }, -1);
 
-  if (markerIndex >= 0) {
+  if (markerIndex >= questionParagraphStart && markerIndex >= 0) {
     return beforeQuestion.slice(markerIndex).trim();
   }
 
-  const paragraphStart = beforeQuestion.lastIndexOf("\n\n");
+  return questionParagraph.trim();
+}
 
-  if (paragraphStart >= 0) {
-    return beforeQuestion.slice(paragraphStart).trim();
+function getQuestionSentences(text: string) {
+  return (
+    text
+      .replace(/\s+/g, " ")
+      .match(/[^.!?]*\?+/g)
+      ?.map((sentence) => sentence.trim())
+      .filter(Boolean) || []
+  );
+}
+
+function getActiveQuestionText(message: string) {
+  const promptText = getLatestPromptText(message);
+  const questions = getQuestionSentences(promptText);
+
+  if (questions.length > 0) {
+    return questions.at(-1) || promptText;
   }
 
   const sentenceStart = Math.max(
-    beforeQuestion.lastIndexOf(". "),
-    beforeQuestion.lastIndexOf("! "),
-    beforeQuestion.lastIndexOf("? "),
+    promptText.lastIndexOf(". "),
+    promptText.lastIndexOf("! "),
+    promptText.lastIndexOf("? "),
   );
 
   if (sentenceStart >= 0) {
-    return beforeQuestion.slice(sentenceStart + 2).trim();
+    return promptText.slice(sentenceStart + 2).trim();
   }
 
-  return beforeQuestion.slice(Math.max(0, beforeQuestion.length - 320)).trim();
+  return promptText;
 }
 
-function getSuggestionTopic(message: string): SuggestionTopic {
-  const text = getLatestPromptText(message).toLowerCase();
+function promptIncludes(text: string, keywords: string[]) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
 
+function classifyActiveQuestion(text: string): SuggestionTopic {
+  const cleanText = text.replace(/\s+/g, " ").trim().toLowerCase();
+
+  if (!cleanText) {
+    return "unknown";
+  }
+
+  if (
+    /(?:siap|setuju|oke|ok).{0,80}(?:buat|membuat|generate|susun).{0,20}prd/i.test(cleanText) ||
+    /(?:buat|membuat|generate|susun).{0,20}prd.{0,80}(?:sekarang|pertama|final|siap)/i.test(cleanText) ||
+    /(?:apakah|apa).{0,80}(?:siap|mau).{0,80}(?:prd|dokumen)/i.test(cleanText)
+  ) {
+    return "generate";
+  }
+
+  if (
+    /(?:siapa|siapa saja|untuk siapa|untuk anda|untuk kamu|untuk para|hanya untuk|juga untuk|target pengguna|pengguna.*siapa|role|peran|pemakai|pakai|memakai|menggunakan|dipakai|akses oleh|login|akun)/i.test(cleanText) &&
+    promptIncludes(cleanText, [
+      "target",
+      "pengguna",
+      "user",
+      "role",
+      "peran",
+      "pemakai",
+      "anda sendiri",
+      "kamu sendiri",
+      "pemilik",
+      "owner",
+      "karyawan",
+      "staf",
+      "staff",
+      "kasir",
+      "admin",
+      "operator",
+      "barista",
+      "pelanggan",
+      "customer",
+      "akun",
+      "login",
+    ])
+  ) {
+    return "target";
+  }
+
+  if (
+    promptIncludes(cleanText, [
+      "fitur apa",
+      "fitur utama",
+      "fitur paling",
+      "prioritas fitur",
+      "fitur mvp",
+      "cakupan mvp",
+      "mvp scope",
+      "yang paling penting",
+      "yang perlu diprioritaskan",
+    ])
+  ) {
+    return "feature";
+  }
+
+  if (
+    promptIncludes(cleanText, [
+      "platform mana",
+      "platform apa",
+      "diakses melalui",
+      "akses melalui",
+      "akses via",
+      "dibuka lewat",
+      "web atau mobile",
+      "mobile atau web",
+      "perangkat apa",
+      "hp atau desktop",
+      "tablet",
+      "pwa",
+    ])
+  ) {
+    return "platform";
+  }
+
+  if (
+    promptIncludes(cleanText, [
+      "teknologi",
+      "tech stack",
+      "stack",
+      "framework",
+      "bahasa pemrograman",
+      "database",
+      "frontend",
+      "front-end",
+      "backend",
+      "back-end",
+      "react",
+      "next.js",
+      "supabase",
+      "firebase",
+      "laravel",
+      "mysql",
+    ])
+  ) {
+    return "tech";
+  }
+
+  if (
+    promptIncludes(cleanText, [
+      "arah visual",
+      "preferensi visual",
+      "warna",
+      "color",
+      "palet",
+      "palette",
+      "desain",
+      "visual",
+      "brand",
+      "tampilan",
+      "nuansa",
+      "tema",
+      "gaya",
+      "ui",
+    ])
+  ) {
+    return "design";
+  }
+
+  if (
+    promptIncludes(cleanText, [
+      "berapa lama",
+      "target waktu",
+      "estimasi waktu",
+      "waktu pengerjaan",
+      "timeline",
+      "deadline",
+    ])
+  ) {
+    return "timeline";
+  }
+
+  if (
+    promptIncludes(cleanText, [
+      "masalah utama",
+      "problem utama",
+      "kendala utama",
+      "tantangan utama",
+      "pain point",
+      "ingin diselesaikan",
+      "ingin kamu selesaikan",
+      "paling ingin kamu selesaikan",
+      "apa yang ingin",
+      "apa yang paling",
+      "mengurangi kesalahan",
+      "memperbaiki",
+    ])
+  ) {
+    return "problem";
+  }
+
+  return "unknown";
+}
+
+function classifySuggestionTopic(text: string): SuggestionTopic {
   if (
     /(?:siap|setuju|oke|ok).{0,80}(?:buat|membuat|generate|susun).{0,20}prd/i.test(text) ||
     /(?:buat|membuat|generate|susun).{0,20}prd.{0,80}(?:sekarang|pertama|final|siap)/i.test(text) ||
@@ -142,100 +322,153 @@ function getSuggestionTopic(message: string): SuggestionTopic {
   }
 
   if (
-    text.includes("masalah") ||
-    text.includes("problem") ||
-    text.includes("kendala") ||
-    text.includes("tantangan") ||
-    text.includes("pain point") ||
-    text.includes("keluhan") ||
-    text.includes("kesalahan") ||
-    text.includes("tidak akurat") ||
-    text.includes("kurang efisien") ||
-    text.includes("mengurangi") ||
-    text.includes("memperbaiki") ||
-    text.includes("masalah utama") ||
-    text.includes("ingin menyelesaikan") ||
-    text.includes("ingin kamu selesaikan") ||
-    text.includes("ingin diselesaikan") ||
-    text.includes("paling ingin kamu selesaikan")
+    promptIncludes(text, [
+      "masalah",
+      "problem",
+      "kendala",
+      "tantangan",
+      "pain point",
+      "keluhan",
+      "kesalahan",
+      "tidak akurat",
+      "kurang efisien",
+      "mengurangi",
+      "memperbaiki",
+      "masalah utama",
+      "ingin menyelesaikan",
+      "ingin kamu selesaikan",
+      "ingin diselesaikan",
+      "paling ingin kamu selesaikan",
+    ])
   ) {
     return "problem";
   }
 
   if (
-    text.includes("arah visual") ||
-    text.includes("preferensi visual") ||
-    text.includes("warna") ||
-    text.includes("color") ||
-    text.includes("desain") ||
-    text.includes("visual") ||
-    text.includes("brand") ||
-    text.includes("tampilan") ||
-    text.includes("nuansa") ||
-    text.includes("tema") ||
-    text.includes("gaya") ||
-    text.includes("ui")
+    promptIncludes(text, [
+      "target",
+      "pengguna",
+      "user",
+      "siapa yang",
+      "siapa saja",
+      "role",
+      "peran",
+      "pemakai",
+      "anda sendiri",
+      "kamu sendiri",
+      "pemilik",
+      "owner",
+      "karyawan",
+      "staf",
+      "staff",
+      "kasir",
+      "admin",
+      "operator",
+      "barista",
+      "pelanggan",
+      "customer",
+    ])
+  ) {
+    return "target";
+  }
+
+  if (
+    promptIncludes(text, [
+      "fitur",
+      "fitur utama",
+      "utama",
+      "prioritas",
+      "mvp scope",
+      "cakupan mvp",
+      "kebutuhan fitur",
+      "paling penting",
+      "yang penting",
+    ])
+  ) {
+    return "feature";
+  }
+
+  if (
+    promptIncludes(text, [
+      "arah visual",
+      "preferensi visual",
+      "warna",
+      "color",
+      "desain",
+      "visual",
+      "brand",
+      "tampilan",
+      "nuansa",
+      "tema",
+      "gaya",
+      "ui",
+    ])
   ) {
     return "design";
   }
 
   if (
-    text.includes("platform") ||
-    text.includes("diakses") ||
-    text.includes("akses") ||
-    text.includes("perangkat") ||
-    text.includes("web") ||
-    text.includes("mobile") ||
-    text.includes("android") ||
-    text.includes("ios") ||
-    text.includes("desktop") ||
-    text.includes("tablet") ||
-    text.includes("hp") ||
-    text.includes("pwa")
+    promptIncludes(text, [
+      "platform",
+      "diakses",
+      "akses",
+      "perangkat",
+      "web",
+      "mobile",
+      "android",
+      "ios",
+      "desktop",
+      "tablet",
+      "hp",
+      "pwa",
+    ])
   ) {
     return "platform";
   }
 
   if (
-    text.includes("teknologi") ||
-    text.includes("stack") ||
-    text.includes("database") ||
-    text.includes("frontend") ||
-    text.includes("front-end") ||
-    text.includes("backend") ||
-    text.includes("back-end") ||
-    text.includes("react") ||
-    text.includes("next.js") ||
-    text.includes("supabase") ||
-    text.includes("firebase") ||
-    text.includes("laravel") ||
-    text.includes("mysql")
+    promptIncludes(text, [
+      "teknologi",
+      "stack",
+      "database",
+      "frontend",
+      "front-end",
+      "backend",
+      "back-end",
+      "react",
+      "next.js",
+      "supabase",
+      "firebase",
+      "laravel",
+      "mysql",
+    ])
   ) {
     return "tech";
   }
 
-  if (text.includes("waktu") || text.includes("estimasi") || text.includes("pengerjaan") || text.includes("timeline") || text.includes("berapa lama")) {
+  if (promptIncludes(text, ["waktu", "estimasi", "pengerjaan", "timeline", "berapa lama"])) {
     return "timeline";
   }
 
-  if (
-    text.includes("target") ||
-    text.includes("pengguna") ||
-    text.includes("user") ||
-    text.includes("siapa yang") ||
-    text.includes("siapa saja") ||
-    text.includes("role") ||
-    text.includes("peran") ||
-    text.includes("pemakai")
-  ) {
-    return "target";
-  }
-
-  if (text.includes("fitur") || text.includes("utama") || text.includes("prioritas")) {
-    return "feature";
-  }
-
   return "unknown";
+}
+
+function getSuggestionTopic(message: string): SuggestionTopic {
+  const promptText = getLatestPromptText(message).toLowerCase();
+  const activeQuestionText = getActiveQuestionText(message);
+  const activeQuestionTopic = classifyActiveQuestion(activeQuestionText);
+
+  if (activeQuestionTopic !== "unknown") {
+    return activeQuestionTopic;
+  }
+
+  const promptQuestionTopic = classifyActiveQuestion(promptText);
+
+  if (promptQuestionTopic !== "unknown") {
+    return promptQuestionTopic;
+  }
+
+  return classifySuggestionTopic(promptText);
 }
 
 function getFallbackSuggestions(message: string, turnCount: number) {
@@ -267,7 +500,7 @@ function getFallbackSuggestions(message: string, turnCount: number) {
   }
 
   if (topic === "target") {
-    return ["👤 Pemilik bisnis", "👥 Staf operasional", "🧑‍💼 Admin internal"];
+    return ["👤 Pemilik bisnis", "👥 Kasir / staf operasional", "🛒 Pelanggan juga", "🤖 AI bantu susun role"];
   }
 
   if (topic === "feature") {
@@ -282,7 +515,7 @@ function getFallbackSuggestions(message: string, turnCount: number) {
     return defaultSuggestions;
   }
 
-  return ["✅ Setuju", "✏️ Aku mau jawab sendiri", "➕ Ada tambahan konteks"];
+  return ["✍️ Jawab bebas", "🤖 AI bantu pilihkan", "➕ Tambahkan konteks"];
 }
 
 function parseSuggestions(replyText: string) {
